@@ -9,7 +9,7 @@ pub struct Response {
     body: Option<String>,
     server: String, //--mine
     content_type: String, 
-    content_length: u64,
+    content_length: Option<u64>,
     date: DateTime<Utc>
 }
 
@@ -17,7 +17,7 @@ impl Response {
     pub fn new(
         status_code: StatusCode, 
         body: Option<String>,
-        content_length: u32
+        content_length: Option<u64>
     ) -> Self {
         let server = format!("{} ({})", ARCH, OS);
         let content_type = String::from("text/html; charset=UTF-8");

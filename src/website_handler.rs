@@ -2,6 +2,7 @@ use super::server::Handler;
 use super::http::{Request, Response, StatusCode, Method};
 use std::fs;
 
+
 pub struct WebsiteHandler {
     public_path: String,
 }
@@ -17,7 +18,7 @@ impl WebsiteHandler {
         match fs::canonicalize(path) {
             Ok(path) => {
                 if path.starts_with(&self.public_path) {
-                    let content_length = fs::metadata(path).unwrap().len();
+                    let content_length = fs::metadata(&path).unwrap().len();
                     let content = fs::read_to_string(path).unwrap();
 
                     Some(( content, content_length ))
@@ -25,10 +26,14 @@ impl WebsiteHandler {
                     println!("Directory Traversal Attack Attempted: {}", file_path);
                     None
                 }
-                // fs::read_to_string(path).ok()
             },
             Err(_) => None
         }
+    }
+
+    fn create_response(&self, file_path: &str) -> Response {
+        let ( content, content_length ) = self.read_file(file_path).unwrap();
+        Response::new(StatusCode::Ok, Some(content), Some(content_length))
     }
 }
 
@@ -36,15 +41,15 @@ impl Handler for WebsiteHandler {
     fn handle_request(&mut self, request: &Request) -> Response {
         match request.method() {
             Method::GET => match request.path() {
-                "/" => Response::new(StatusCode::Ok, self.read_file("index.html")),
-                "/hello" => Response::new(StatusCode::Ok, self.read_file("hello.html")),
+                "/" => self.create_response("index.html"),
+                "/hello" => self.create_response("hello.html"),
 
                 path => match self.read_file(path) {
-                    Some(contents) => Response::new(StatusCode::Ok, Some(contents)),
-                    None => Response::new(StatusCode::NotFound, None)
+                    Some(_) => self.create_response(path),
+                    None => Response::new(StatusCode::NotFound, None, None)
                 }
             }
-            _ => Response::new(StatusCode::NotFound, None)
+            _ => Response::new(StatusCode::NotFound, None, None)
         }
     }
 }
