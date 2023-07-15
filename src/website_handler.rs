@@ -17,28 +17,10 @@ impl WebsiteHandler {
         match fs::canonicalize(path) {
             Ok(path) => {
                 if path.starts_with(&self.public_path) {
-                    // if let Ok(metadata) = fs::metadata(path) {
-                    //     let content_length = metadata.len();
+                    let content_length = fs::metadata(path).unwrap().len();
+                    let content = fs::read_to_string(path).unwrap();
 
-                    //     Some((
-                    //         fs::read_to_string(path)?,
-                    //         content_length
-                    //     ))
-                    // }
-
-                    // let content_length = fs::metadata(path)?;
-                    // let size = content_length.len();
-
-                    // // unimplemented!();
-                    // let content = fs::read_to_string(path)?;
-
-                    // Some((content, size))
-
-                    let metadata = fs::metadata(path).unwrap();
-
-
-                    unimplemented!()
-                 
+                    Some(( content, content_length ))
                 } else {
                     println!("Directory Traversal Attack Attempted: {}", file_path);
                     None
