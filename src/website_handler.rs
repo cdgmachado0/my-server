@@ -11,13 +11,29 @@ impl WebsiteHandler {
         Self { public_path }
     }
 
-    fn read_file(&self, file_path: &str) -> Option<String> {
+    fn read_file(&self, file_path: &str) -> Option<(String, u64)> {
         let path = format!("{}/{}", self.public_path, file_path);
 
         match fs::canonicalize(path) {
             Ok(path) => {
                 if path.starts_with(&self.public_path) {
-                    fs::read_to_string(path).ok()
+                    if let Ok(metadata) = fs::metadata(path) {
+                        let content_length = metadata.len();
+
+                        Some((
+                            fs::read_to_string(path)?,
+                            content_length
+                        ))
+                    }
+
+                    // let content_length = fs::metadata(path)?;
+                    // let size = content_length.len();
+
+                    // // unimplemented!();
+                    // let content = fs::read_to_string(path)?;
+
+                    // Some((content, size))
+                 
                 } else {
                     println!("Directory Traversal Attack Attempted: {}", file_path);
                     None
@@ -34,7 +50,7 @@ impl Handler for WebsiteHandler {
             Method::GET => match request.path() {
                 "/" => Response::new(StatusCode::Ok, self.read_file("index.html")),
                 "/hello" => Response::new(StatusCode::Ok, self.read_file("hello.html")),
-                
+
                 path => match self.read_file(path) {
                     Some(contents) => Response::new(StatusCode::Ok, Some(contents)),
                     None => Response::new(StatusCode::NotFound, None)

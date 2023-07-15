@@ -9,7 +9,7 @@ pub trait Handler {
 
     fn handle_bad_request(&mut self, e: &ParseError) -> Response {
         println!("Failed to parse request: {}", e);
-        Response::new(StatusCode::BadRequest, None)
+        ::new(StatusCode::BadRequest, None)
     }
 }
 

@@ -1,17 +1,36 @@
-use std::net::TcpStream;
 use std::io::{Write, Result as IoResult};
-use std::fmt::{Display, Formatter, Result as FmtResult};
 use super::StatusCode;
+use chrono::prelude::{DateTime, Utc};
+use std::env::consts::{OS, ARCH};
 
 #[derive(Debug)]
 pub struct Response {
     status_code: StatusCode,
     body: Option<String>,
+    server: String, //--mine
+    content_type: String, 
+    content_length: u64,
+    date: DateTime<Utc>
 }
 
 impl Response {
-    pub fn new(status_code: StatusCode, body: Option<String>) -> Self {
-        Response { status_code, body }
+    pub fn new(
+        status_code: StatusCode, 
+        body: Option<String>,
+        content_length: u32
+    ) -> Self {
+        let server = format!("{} ({})", ARCH, OS);
+        let content_type = String::from("text/html; charset=UTF-8");
+        let date = Utc::now();
+        
+        Response { 
+            status_code, 
+            body, 
+            server,
+            content_type,
+            content_length,
+            date
+        }
     }
 
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
