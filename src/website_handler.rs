@@ -33,6 +33,8 @@ impl WebsiteHandler {
 
     fn create_response(&self, file_path: &str) -> Response {
         let ( content, content_length ) = self.read_file(file_path).unwrap();
+        file_path.find('.') //<--- with the index, do as requests.rs and filter out the file ext
+
         Response::new(StatusCode::Ok, Some(content), Some(content_length))
     }
 }

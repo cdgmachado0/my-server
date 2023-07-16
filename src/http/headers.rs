@@ -11,9 +11,12 @@ pub struct HeadersResp {
 
 
 impl HeadersResp {
-    pub fn new(content_length: Option<u64>) -> Self {
+    pub fn new(content_length: Option<u64>, file_type: ContentType) -> Self {
         let server = format!("{} ({})", ARCH, OS);
-        let content_type = String::from("text/html; charset=UTF-8");
+        let content_type = match file_type {
+            ContentType::HTML => String::from("text/html; charset=UTF-8"),
+            ContentType::CSS => String::from("text/css")
+        };
         let date = Utc::now();
 
         HeadersResp {
@@ -39,4 +42,10 @@ impl HeadersResp {
     pub fn date(&self) -> &DateTime<Utc> {
         &self.date
     }
+}
+
+#[derive(Debug)]
+enum ContentType {
+    HTML,
+    CSS,
 }
