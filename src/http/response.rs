@@ -1,7 +1,8 @@
 use std::io::{Write, Result as IoResult};
 use super::StatusCode;
-use chrono::prelude::{DateTime, Utc};
-use std::env::consts::{OS, ARCH};
+use super::headers::HeadersResp;
+// use chrono::prelude::{DateTime, Utc};
+// use std::env::consts::{OS, ARCH};
 
 
 #[derive(Debug)]
@@ -21,9 +22,9 @@ impl Response {
         body: Option<String>,
         content_length: Option<u64>
     ) -> Self {
-        let server = format!("{} ({})", ARCH, OS);
-        let content_type = String::from("text/html; charset=UTF-8");
-        let date = Utc::now();
+        // let server = format!("{} ({})", ARCH, OS);
+        // let content_type = String::from("text/html; charset=UTF-8");
+        // let date = Utc::now();
         
         Response { 
             status_code, 
