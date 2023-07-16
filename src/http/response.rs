@@ -39,11 +39,17 @@ impl Response {
             None => ""
         };
 
+        let content_length = &self.content_length.unwrap();
+
         write!(
             stream, 
-            "HTTP/1.1 {} {} \r\n\r\n{}", 
+            "HTTP/1.1 {} {}\r\nServer: {}\r\nContent-Type: {}\r\nContent-Length: {}\r\nDate: {} \r\n\r\n{}", 
             self.status_code,
             self.status_code.reason_phrase(),
+            self.server,
+            self.content_type,
+            content_length,
+            date,
             body
         )
     }
