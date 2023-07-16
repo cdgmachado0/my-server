@@ -1,6 +1,7 @@
 use chrono::prelude::{DateTime, Utc};
 use std::env::consts::{OS, ARCH};
 
+#[derive(Debug)]
 pub struct HeadersResp {
     server: String,
     content_type: String, 
@@ -10,7 +11,7 @@ pub struct HeadersResp {
 
 
 impl HeadersResp {
-    fn set(length: Option<u64>) -> Self {
+    pub fn new(content_length: Option<u64>) -> Self {
         let server = format!("{} ({})", ARCH, OS);
         let content_type = String::from("text/html; charset=UTF-8");
         let date = Utc::now();
@@ -18,9 +19,24 @@ impl HeadersResp {
         HeadersResp {
             server,
             content_type,
-            content_length: length.unwrap(),
+            content_length: content_length.unwrap(),
             date,
         }
-    } //put this impl in response.rs
+    }
 
+    pub fn server(&self) -> &str {
+        &self.server
+    }
+
+    pub fn content_type(&self) -> &str {
+        &self.content_type
+    }
+
+    pub fn content_length(&self) -> &u64 {
+        &self.content_length
+    }
+
+    pub fn date(&self) -> &DateTime<Utc> {
+        &self.date
+    }
 }
