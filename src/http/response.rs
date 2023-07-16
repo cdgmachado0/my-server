@@ -3,15 +3,17 @@ use super::StatusCode;
 use chrono::prelude::{DateTime, Utc};
 use std::env::consts::{OS, ARCH};
 
+
 #[derive(Debug)]
 pub struct Response {
     status_code: StatusCode,
     body: Option<String>,
-    server: String, //--mine
+    server: String,
     content_type: String, 
     content_length: Option<u64>,
     date: DateTime<Utc>
 }
+
 
 impl Response {
     pub fn new(
@@ -49,7 +51,7 @@ impl Response {
             self.server,
             self.content_type,
             content_length,
-            date,
+            self.date,
             body
         )
     }
