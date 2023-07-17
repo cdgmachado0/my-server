@@ -71,7 +71,7 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
 }
 
 
-fn get_next_line(request: &str) {
+fn get_next_line(request: &str) -> Option<&str>  {
     let host_str = "Host";
     let index = request.rfind(host_str).unwrap();
     let last_i = index + host_str.len() + 2;
@@ -84,18 +84,19 @@ fn get_next_line(request: &str) {
         if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
             println!("hello");
 
-            let x = &request[last_i..i - 1];
-            println!("x ****: {}", x);
-            let y = &request[i + 2..];
-            println!("y: {}", y);
+            println!("x: {}", &request[last_i..i]);
+            // println!("x: {}", &request[last_i..i].len());
+
+            return Some(&request[last_i..i - 1])
+          
         }
 
-        n += 1;
-        if n == 35 {
-            break;
-        }
-        
+        // n += 1;
+        // if n == 35 {
+        //     break;
+        // }
     }
+    None
 
 }
 
