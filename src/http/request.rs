@@ -32,6 +32,9 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 
     fn try_from(buf: &'buf [u8]) -> Result<Self, Self::Error> {
         let request = str::from_utf8(buf)?;
+        let req = &request;
+
+        get_next_line(&req);
 
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
         let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
@@ -65,6 +68,35 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
         }
     }
     None
+}
+
+
+fn get_next_line(request: &str) {
+    let host_str = "Host";
+    let index = request.rfind(host_str).unwrap();
+    let last_i = index + host_str.len() + 2;
+    println!("request *******: {}", index);
+    let mut n = 0;
+
+    
+    for (i, c) in request.chars().enumerate().skip(last_i) { 
+        println!("c: {} / i: {}", c, i);
+        if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
+            println!("hello");
+
+            let x = &request[last_i..i - 1];
+            println!("x ****: {}", x);
+            let y = &request[i + 2..];
+            println!("y: {}", y);
+        }
+
+        n += 1;
+        if n == 35 {
+            break;
+        }
+        
+    }
+
 }
 
 pub enum ParseError {
