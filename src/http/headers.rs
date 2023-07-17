@@ -14,8 +14,8 @@ impl HeadersResp {
     pub fn new(content_length: Option<u64>, file_type: ContentType) -> Self {
         let server = format!("{} ({})", ARCH, OS);
         let content_type = match file_type {
-            ContentType::HTML => String::from("text/html; charset=UTF-8"),
-            ContentType::CSS => String::from("text/css")
+            ContentType::HTML | ContentType::NoType => String::from("text/html; charset=UTF-8"),
+            ContentType::CSS => String::from("text/css"),
         };
         let date = Utc::now();
 
@@ -45,7 +45,8 @@ impl HeadersResp {
 }
 
 #[derive(Debug)]
-enum ContentType {
+pub enum ContentType {
     HTML,
     CSS,
+    NoType
 }

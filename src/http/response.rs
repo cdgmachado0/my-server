@@ -1,6 +1,6 @@
 use std::io::{Write, Result as IoResult};
 use super::StatusCode;
-use super::headers::HeadersResp;
+use super::headers::{HeadersResp, ContentType};
 
 
 #[derive(Debug)]
@@ -15,12 +15,13 @@ impl Response {
     pub fn new(
         status_code: StatusCode, 
         body: Option<String>,
-        content_length: Option<u64>
+        content_length: Option<u64>,
+        file_type: ContentType
     ) -> Self {
         Response { 
             status_code, 
             body, 
-            headers: HeadersResp::new(content_length)
+            headers: HeadersResp::new(content_length, file_type)
         }
     }
 

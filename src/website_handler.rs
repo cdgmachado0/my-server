@@ -1,5 +1,5 @@
 use super::server::Handler;
-use super::http::{Request, Response, StatusCode, Method};
+use super::http::{Request, Response, StatusCode, Method, headers::ContentType};
 use std::fs;
 
 
@@ -33,9 +33,18 @@ impl WebsiteHandler {
 
     fn create_response(&self, file_path: &str) -> Response {
         let ( content, content_length ) = self.read_file(file_path).unwrap();
-        file_path.find('.') //<--- with the index, do as requests.rs and filter out the file ext
+        let mut file_type = ContentType::NoType;
 
-        Response::new(StatusCode::Ok, Some(content), Some(content_length))
+        if let Some(i) = file_path.find('.') {
+            let ext = &file_path[i + 1..];
+
+            file_type = match ext {
+                "html" => ContentType::HTML,
+                "css" => ContentType::CSS,
+                _ => ContentType::NoType
+            }
+        }
+        Response::new(StatusCode::Ok, Some(content), Some(content_length), file_type)
     }
 }
 
@@ -48,10 +57,10 @@ impl Handler for WebsiteHandler {
 
                 path => match self.read_file(path) {
                     Some(_) => self.create_response(path),
-                    None => Response::new(StatusCode::NotFound, None, None)
+                    None => Response::new(StatusCode::NotFound, None, None, ContentType::NoType)
                 }
             }
-            _ => Response::new(StatusCode::NotFound, None, None)
+            _ => Response::new(StatusCode::NotFound, None, None, ContentType::NoType)
         }
     }
 }
