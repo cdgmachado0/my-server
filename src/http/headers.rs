@@ -1,5 +1,6 @@
 use chrono::prelude::{DateTime, Utc};
 use std::env::consts::{OS, ARCH};
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct HeadersResp {
@@ -9,6 +10,25 @@ pub struct HeadersResp {
     date: DateTime<Utc>
 }
 
+pub struct HeadersReq<'buf> {
+    keys: [&'buf str; 4],
+    data: Option<HashMap<&'buf str, &'buf str>>
+}
+
+
+impl<'buf> HeadersReq<'buf> {
+    pub fn init() {
+        Self {
+            keys: [
+                "Host",
+                "User-Agent",
+                "Accept",
+                "Accept-Language"
+            ],
+            data: None
+        };
+    }
+}
 
 impl HeadersResp {
     pub fn new(content_length: Option<u64>, file_type: ContentType) -> Self {

@@ -1,5 +1,11 @@
 use std::io::Read;
-use crate::http::{Request, Response, StatusCode, ParseError, headers::ContentType};
+use crate::http::{
+    Request, 
+    Response, 
+    StatusCode, 
+    ParseError, 
+    headers::{ContentType}
+};
 use std::convert::TryFrom;
 use std::net::TcpListener;
 
