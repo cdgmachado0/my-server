@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter, Result as FmtResult, Debug};
 use std::str;
 use std::str::Utf8Error;
-use super::QueryString;
+use super::{QueryString, headers::HeadersReq};
 
 #[derive(Debug)]
 pub struct Request<'buf> {
@@ -72,6 +72,8 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
 
 
 fn get_next_line(request: &str) -> Option<&str>  {
+
+    for x in 
     let host_str = "Host";
     let index = request.rfind(host_str).unwrap();
     let last_i = index + host_str.len() + 2;

@@ -28,6 +28,14 @@ impl<'hr> HeadersReq<'hr> {
             data: None
         };
     }
+
+    pub fn keys(&self) -> &[&str] {
+        &self.keys
+    }
+
+    pub fn data(&self) -> &HashMap<&str, &str> {
+        &self.data.unwrap()
+    }
 }
 
 impl HeadersResp {
