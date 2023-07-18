@@ -10,13 +10,13 @@ pub struct HeadersResp {
     date: DateTime<Utc>
 }
 
-pub struct HeadersReq<'buf> {
-    keys: [&'buf str; 4],
-    data: Option<HashMap<&'buf str, &'buf str>>
+pub struct HeadersReq<'hr> {
+    keys: [&'hr str; 4],
+    data: Option<HashMap<&'hr str, &'hr str>>
 }
 
 
-impl<'buf> HeadersReq<'buf> {
+impl<'hr> HeadersReq<'hr> {
     pub fn init() {
         Self {
             keys: [

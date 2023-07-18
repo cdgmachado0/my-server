@@ -4,7 +4,7 @@ use crate::http::{
     Response, 
     StatusCode, 
     ParseError, 
-    headers::{ContentType}
+    headers::{ContentType, HeadersReq}
 };
 use std::convert::TryFrom;
 use std::net::TcpListener;
@@ -30,6 +30,7 @@ impl Server {
 
     pub fn run(self, mut handler: impl Handler) {
         println!("Listening on {}", self.addr);
+        HeadersReq::init();
 
         let listener = TcpListener::bind(&self.addr).unwrap();
 

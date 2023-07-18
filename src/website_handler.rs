@@ -1,5 +1,11 @@
 use super::server::Handler;
-use super::http::{Request, Response, StatusCode, Method, headers::ContentType};
+use super::http::{
+    Request, 
+    Response, 
+    StatusCode, 
+    Method, 
+    headers::{ContentType, HeadersReq}
+};
 use std::fs;
 
 
