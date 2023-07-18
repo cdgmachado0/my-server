@@ -11,30 +11,17 @@ pub struct HeadersResp {
 }
 
 pub struct HeadersReq<'hr> {
-    keys: [&'hr str; 4],
     data: Option<HashMap<&'hr str, &'hr str>>
 }
 
 
 impl<'hr> HeadersReq<'hr> {
-    pub fn init() {
-        Self {
-            keys: [
-                "Host",
-                "User-Agent",
-                "Accept",
-                "Accept-Language"
-            ],
-            data: None
-        };
+    pub fn new() -> Self {
+       Self { data: None }
     }
 
-    pub fn keys(&self) -> &[&str] {
-        &self.keys
-    }
-
-    pub fn data(&self) -> &HashMap<&str, &str> {
-        &self.data.unwrap()
+    pub fn data(&self) -> Option<&HashMap<&str, &str>> {
+        self.data.as_ref()
     }
 }
 

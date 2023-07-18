@@ -30,7 +30,6 @@ impl Server {
 
     pub fn run(self, mut handler: impl Handler) {
         println!("Listening on {}", self.addr);
-        HeadersReq::init();
 
         let listener = TcpListener::bind(&self.addr).unwrap();
 

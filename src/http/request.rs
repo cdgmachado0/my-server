@@ -32,8 +32,8 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
 
     fn try_from(buf: &'buf [u8]) -> Result<Self, Self::Error> {
         let request = str::from_utf8(buf)?;
-        let req = &request;
 
+        let req = &request;
         get_next_line(&req);
 
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
@@ -70,20 +70,42 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
     None
 }
 
+// -> Option<&str>
+fn get_next_line(request: &str) { 
+    let keys = [
+        "Host",
+        "User-Agent",
+        "Accept",
+        "Accept-Language"
+    ];
 
-fn get_next_line(request: &str) -> Option<&str>  {
+    let headers = HeadersReq::new();
 
-    for x in 
-    let host_str = "Host";
-    let index = request.rfind(host_str).unwrap();
-    let last_i = index + host_str.len() + 2;
-    
-    for (i, c) in request.chars().enumerate().skip(last_i) { 
-        if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
-            return Some(&request[last_i..i - 1])
+    for (i, key) in keys.iter().enumerate() { 
+        let index = request.rfind(key).unwrap();
+        let last_i = index + key.len() + 2;
+
+        for (i, c) in request.chars().enumerate().skip(last_i) { 
+            if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
+                headers.data().insert(key, &request[last_i..i - 1]);
+                
+                // return Some(&request[last_i..i - 1])
+            }
         }
+
     }
-    None
+
+    
+    // let host_str = "Host";
+    // let index = request.rfind(host_str).unwrap();
+    // let last_i = index + host_str.len() + 2;
+    
+    // for (i, c) in request.chars().enumerate().skip(last_i) { 
+    //     if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
+    //         return Some(&request[last_i..i - 1])
+    //     }
+    // }
+    // None
 }
 
 pub enum ParseError {
