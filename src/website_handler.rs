@@ -4,7 +4,7 @@ use super::http::{
     Response, 
     StatusCode, 
     Method, 
-    headers::{ContentType, HeadersReq}
+    headers::ContentType
 };
 use std::fs;
 

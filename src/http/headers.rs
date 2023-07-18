@@ -10,17 +10,18 @@ pub struct HeadersResp {
     date: DateTime<Utc>
 }
 
-pub struct HeadersReq<'hr> {
-    data: Option<HashMap<&'hr str, &'hr str>>
+#[derive(Debug)]
+pub struct HeadersReq<'buf> {
+    data: Option<HashMap<&'buf str, &'buf str>>
 }
 
 
-impl<'hr> HeadersReq<'hr> {
+impl<'buf> HeadersReq<'buf> {
     pub fn new() -> Self {
        Self { data: None }
     }
 
-    pub fn data(self) -> HashMap<&'hr str, &'hr str> {
+    pub fn data(self) -> HashMap<&'buf str, &'buf str> {
         self.data.unwrap()
     }
 }

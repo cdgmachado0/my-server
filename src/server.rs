@@ -4,7 +4,7 @@ use crate::http::{
     Response, 
     StatusCode, 
     ParseError, 
-    headers::{ContentType, HeadersReq}
+    headers::ContentType
 };
 use std::convert::TryFrom;
 use std::net::TcpListener;

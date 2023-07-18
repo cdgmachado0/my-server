@@ -1,4 +1,5 @@
 use super::method::{Method, MethodError};
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result as FmtResult, Debug};
@@ -10,7 +11,8 @@ use super::{QueryString, headers::HeadersReq};
 pub struct Request<'buf> {
     path: &'buf str,
     query_string: Option<QueryString<'buf>>,
-    method: Method
+    method: Method,
+    headers: HeadersReq<'buf>
 } 
 
 impl<'buf> Request<'buf> {
@@ -33,8 +35,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     fn try_from(buf: &'buf [u8]) -> Result<Self, Self::Error> {
         let request = str::from_utf8(buf)?;
 
-        let req = &request;
-        get_next_header(&req);
+        let headers = get_headers(&request);
 
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
         let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
@@ -56,10 +57,12 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
         Ok(Self {
             path,
             query_string,
-            method
+            method,
+            headers
         })
     }
 }
+
 
 fn get_next_word(request: &str) -> Option<(&str, &str)> { 
     for (i, c) in request.chars().enumerate() {
@@ -70,8 +73,8 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
     None
 }
 
-// -> Option<&str>
-fn get_next_header(request: &str) { 
+
+fn get_headers(request: &str) -> &HeadersReq<'_> { 
     let keys = [
         "Host",
         "User-Agent",
@@ -79,33 +82,21 @@ fn get_next_header(request: &str) {
         "Accept-Language"
     ];
 
-    let headers = HeadersReq::new();
+    let mut headers = HeadersReq::new();
+    let copy_headers: &mut HeadersReq = &mut headers;
     let borrow_head = &mut headers.data();
 
-    for (i, key) in keys.iter().enumerate() { 
+    for key in keys.iter() { 
         let index = request.rfind(key).unwrap();
         let last_i = index + key.len() + 2;
 
         for (i, c) in request.chars().enumerate().skip(last_i) { 
-            if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
+            if c == '\r' && request.chars().nth(i + 1).unwrap() == '\n' {
                 borrow_head.insert(key, &request[last_i..i - 1]);
-                // return Some(&request[last_i..i - 1])
             }
         }
-
     }
-
-    
-    // let host_str = "Host";
-    // let index = request.rfind(host_str).unwrap();
-    // let last_i = index + host_str.len() + 2;
-    
-    // for (i, c) in request.chars().enumerate().skip(last_i) { 
-    //     if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
-    //         return Some(&request[last_i..i - 1])
-    //     }
-    // }
-    // None
+    return &*copy_headers;
 }
 
 pub enum ParseError {
