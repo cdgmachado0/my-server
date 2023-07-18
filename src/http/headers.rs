@@ -20,8 +20,8 @@ impl<'hr> HeadersReq<'hr> {
        Self { data: None }
     }
 
-    pub fn data(&self) -> Option<&HashMap<&str, &str>> {
-        self.data.as_ref()
+    pub fn data(self) -> HashMap<&'hr str, &'hr str> {
+        self.data.unwrap()
     }
 }
 

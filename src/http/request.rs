@@ -34,7 +34,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
         let request = str::from_utf8(buf)?;
 
         let req = &request;
-        get_next_line(&req);
+        get_next_header(&req);
 
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
         let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
@@ -71,7 +71,7 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
 }
 
 // -> Option<&str>
-fn get_next_line(request: &str) { 
+fn get_next_header(request: &str) { 
     let keys = [
         "Host",
         "User-Agent",
@@ -80,6 +80,7 @@ fn get_next_line(request: &str) {
     ];
 
     let headers = HeadersReq::new();
+    let borrow_head = &mut headers.data();
 
     for (i, key) in keys.iter().enumerate() { 
         let index = request.rfind(key).unwrap();
@@ -87,8 +88,7 @@ fn get_next_line(request: &str) {
 
         for (i, c) in request.chars().enumerate().skip(last_i) { 
             if c == '\r' && request.chars().nth(i+1).unwrap() == '\n' {
-                headers.data().insert(key, &request[last_i..i - 1]);
-                
+                borrow_head.insert(key, &request[last_i..i - 1]);
                 // return Some(&request[last_i..i - 1])
             }
         }
