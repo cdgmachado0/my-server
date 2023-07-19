@@ -11,18 +11,22 @@ pub struct HeadersResp {
 }
 
 #[derive(Debug)]
-pub struct HeadersReq<'buf> {
-    data: Option<HashMap<&'buf str, &'buf str>>
+pub struct HeadersReq<'hr> {
+    data: Option<HashMap<&'hr str, &'hr str>>
 }
 
 
-impl<'buf> HeadersReq<'buf> {
+impl<'hr> HeadersReq<'hr> {
     pub fn new() -> Self {
        Self { data: None }
     }
 
-    pub fn data(self) -> HashMap<&'buf str, &'buf str> {
-        self.data.unwrap()
+    pub fn insert(&mut self, key: &'hr str, value: &'hr str) {
+        self.data.get_or_insert_with(HashMap::new).insert(key, value);
+    }
+
+    pub fn data(&self) -> Option<&HashMap<&str, &str>> {
+        self.data.as_ref()
     }
 }
 

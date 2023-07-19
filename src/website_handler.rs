@@ -56,6 +56,8 @@ impl WebsiteHandler {
 
 impl Handler for WebsiteHandler {
     fn handle_request(&mut self, request: &Request) -> Response {
+        // Self::print_req_headers(request);
+
         match request.method() {
             Method::GET => match request.path() {
                 "/" => self.create_response("index.html"),
@@ -68,5 +70,16 @@ impl Handler for WebsiteHandler {
             }
             _ => Response::new(StatusCode::NotFound, None, None, ContentType::NoType)
         }
+    }
+
+    fn print_req_headers(request: &Request) {
+        let map = request.headers().data().unwrap();
+
+        println!("My Request headers *****");
+        println!("Host ----: {}", map.get("Host").unwrap());
+        println!("user-ag ----: {}", map.get("User-Agent").unwrap());
+        println!("acc ---: {}", map.get("Accept").unwrap());
+        println!("acc-lng ----: {}", map.get("Accept-Language").unwrap());
+        println!("****** END *****")
     }
 }

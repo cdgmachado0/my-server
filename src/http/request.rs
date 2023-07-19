@@ -1,5 +1,4 @@
 use super::method::{Method, MethodError};
-use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::error::Error;
 use std::fmt::{Display, Formatter, Result as FmtResult, Debug};
@@ -26,6 +25,10 @@ impl<'buf> Request<'buf> {
 
     pub fn query_string(&self) -> Option<&QueryString> {
         self.query_string.as_ref()
+    }
+
+    pub fn headers(&self) -> &HeadersReq {
+        &self.headers
     }
 }
 
@@ -74,7 +77,7 @@ fn get_next_word(request: &str) -> Option<(&str, &str)> {
 }
 
 
-fn get_headers(request: &str) -> &HeadersReq<'_> { 
+fn get_headers(request: &str) -> HeadersReq<'_> { 
     let keys = [
         "Host",
         "User-Agent",
@@ -83,8 +86,6 @@ fn get_headers(request: &str) -> &HeadersReq<'_> {
     ];
 
     let mut headers = HeadersReq::new();
-    let copy_headers: &mut HeadersReq = &mut headers;
-    let borrow_head = &mut headers.data();
 
     for key in keys.iter() { 
         let index = request.rfind(key).unwrap();
@@ -92,11 +93,12 @@ fn get_headers(request: &str) -> &HeadersReq<'_> {
 
         for (i, c) in request.chars().enumerate().skip(last_i) { 
             if c == '\r' && request.chars().nth(i + 1).unwrap() == '\n' {
-                borrow_head.insert(key, &request[last_i..i - 1]);
+                headers.insert(key, &request[last_i..i - 1]);
+
             }
         }
     }
-    return &*copy_headers;
+    return headers;
 }
 
 pub enum ParseError {

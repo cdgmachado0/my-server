@@ -17,6 +17,8 @@ pub trait Handler {
         println!("Failed to parse request: {}", e);
         Response::new(StatusCode::BadRequest, None, None, ContentType::NoType)
     }
+
+    fn print_req_headers(request: &Request);
 }
 
 pub struct Server {
