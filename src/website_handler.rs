@@ -56,7 +56,7 @@ impl WebsiteHandler {
 
 impl Handler for WebsiteHandler {
     fn handle_request(&mut self, request: &Request) -> Response {
-        // Self::print_req_headers(request);
+        Self::print_req_headers(request);
 
         match request.method() {
             Method::GET => match request.path() {
@@ -78,7 +78,7 @@ impl Handler for WebsiteHandler {
         println!("My Request headers *****");
         println!("Host ----: {}", map.get("Host").unwrap());
         println!("user-ag ----: {}", map.get("User-Agent").unwrap());
-        println!("acc ---: {}", map.get("Accept").unwrap());
+        println!("acc-enc ---: {}", map.get("Accept-Encoding").unwrap());
         println!("acc-lng ----: {}", map.get("Accept-Language").unwrap());
         println!("****** END *****")
     }

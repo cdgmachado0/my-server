@@ -81,7 +81,7 @@ fn get_headers(request: &str) -> HeadersReq<'_> {
     let keys = [
         "Host",
         "User-Agent",
-        "Accept",
+        "Accept-Encoding",
         "Accept-Language"
     ];
 
@@ -91,10 +91,10 @@ fn get_headers(request: &str) -> HeadersReq<'_> {
         let index = request.rfind(key).unwrap();
         let last_i = index + key.len() + 2;
 
-        for (i, c) in request.chars().enumerate().skip(last_i) { 
-            if c == '\r' && request.chars().nth(i + 1).unwrap() == '\n' {
+        'inner: for (i, c) in request.chars().enumerate().skip(last_i) { 
+            if c == '\r' && request.chars().nth(i + 1).unwrap() == '\n'{
                 headers.insert(key, &request[last_i..i - 1]);
-
+                break 'inner;
             }
         }
     }
