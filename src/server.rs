@@ -8,6 +8,8 @@ use crate::http::{
 };
 use std::convert::TryFrom;
 use std::net::TcpListener;
+use std::sync::Mutex;
+use std::thread;
 
 
 pub trait Handler {
@@ -42,12 +44,15 @@ impl Server {
 
                     match stream.read(&mut buffer) {
                         Ok(_) => {
-                            println!("Received a request: {}", String::from_utf8_lossy(&buffer));
+                            let joinHandle = thread::spawn(move || {
+                                println!("Received a request: {}", String::from_utf8_lossy(&buffer));
 
-                            let response = match Request::try_from(&buffer[..]) {
-                                Ok(request) => handler.handle_request(&request),
-                                Err(e) => handler.handle_bad_request(&e),            
-                            };
+                                match Request::try_from(&buffer[..]) {
+                                    Ok(request) => handler.handle_request(&request),
+                                    Err(e) => handler.handle_bad_request(&e),            
+                                }
+                            });
+                            let response = joinHandle.join()?;
                             if let Err(e) = response.send(&mut stream) {
                                 println!("Failed to parse a request: {}", e);
                             }
