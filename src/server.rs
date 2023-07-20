@@ -1,5 +1,4 @@
 use std::io::Read;
-use crate::http::response;
 use crate::http::{
     Request, 
     Response, 
@@ -10,10 +9,7 @@ use crate::http::{
 use std::convert::TryFrom;
 use std::net::TcpListener;
 use std::thread;
-use core::fmt::Display;
 use std::any::Any;
-// use std::marker::Send;
-use std::fmt;
 use std::sync::{Arc, Mutex};
 
 
@@ -64,8 +60,10 @@ impl Server {
                             );  
 
                             match join_handle.join() {
-                                Ok(response) => {
-                                    response.send(&mut stream);
+                                Ok(response) => {   
+                                    if let Err(e) = response.send(&mut stream) {
+                                        println!("Failed to parse a request: {}", e);
+                                    }
                                 },
                                 Err(e) => {
                                     println!("Failed to parse a request: {}", Self::format_any(&e));
