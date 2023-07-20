@@ -37,7 +37,7 @@ impl Server {
         Self { addr }
     }
 
-    pub fn run(self, mut handler: impl Handler) {
+    pub fn run(self, handler: impl Handler + 'static) {
         println!("Listening on {}", self.addr);
         let handler_arc = Arc::new(Mutex::new(handler));
 
@@ -52,9 +52,9 @@ impl Server {
                         Ok(_) => {
                             let handler_clone = Arc::clone(&handler_arc);
 
-                            let joinHandle = thread::spawn(move || {
+                            let join_handle = thread::spawn(move || {
                                     println!("Received a request: {}", String::from_utf8_lossy(&buffer));
-                                    let handler = handler_clone.lock().unwrap();
+                                    let mut handler = handler_clone.lock().unwrap();
     
                                     match Request::try_from(&buffer[..]) {
                                         Ok(request) => handler.handle_request(&request),
@@ -63,7 +63,7 @@ impl Server {
                                 }
                             );  
 
-                            match joinHandle.join() {
+                            match join_handle.join() {
                                 Ok(response) => {
                                     response.send(&mut stream);
                                 },
