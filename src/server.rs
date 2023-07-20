@@ -1,4 +1,3 @@
-use std::io::Read;
 use crate::http::{
     Request, 
     Response, 
@@ -6,11 +5,15 @@ use crate::http::{
     ParseError, 
     headers::ContentType
 };
-use std::convert::TryFrom;
-use std::net::TcpListener;
-use std::thread;
-use std::any::Any;
-use std::sync::{Arc, Mutex};
+
+use std::{
+    thread,
+    io::Read,
+    any::Any,
+    convert::TryFrom,
+    net::TcpListener,
+    sync::{Arc, Mutex}
+};
 
 
 pub trait Handler: Send + Sync {
