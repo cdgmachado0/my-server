@@ -52,7 +52,7 @@ impl Server {
                                     Err(e) => handler.handle_bad_request(&e),            
                                 }
                             });
-                            let response = joinHandle.join()?;
+                            let response = joinHandle.join().map(|resp| resp);
                             if let Err(e) = response.send(&mut stream) {
                                 println!("Failed to parse a request: {}", e);
                             }
