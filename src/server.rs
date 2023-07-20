@@ -1,4 +1,5 @@
 use std::io::Read;
+use crate::http::response;
 use crate::http::{
     Request, 
     Response, 
@@ -8,11 +9,15 @@ use crate::http::{
 };
 use std::convert::TryFrom;
 use std::net::TcpListener;
-use std::sync::Mutex;
 use std::thread;
+use core::fmt::Display;
+use std::any::Any;
+// use std::marker::Send;
+use std::fmt;
+use std::sync::{Arc, Mutex};
 
 
-pub trait Handler {
+pub trait Handler: Send + Sync {
     fn handle_request(&mut self, request: &Request) -> Response;
 
     fn handle_bad_request(&mut self, e: &ParseError) -> Response {
@@ -34,6 +39,7 @@ impl Server {
 
     pub fn run(self, mut handler: impl Handler) {
         println!("Listening on {}", self.addr);
+        let handler_arc = Arc::new(Mutex::new(handler));
 
         let listener = TcpListener::bind(&self.addr).unwrap();
 
@@ -44,18 +50,27 @@ impl Server {
 
                     match stream.read(&mut buffer) {
                         Ok(_) => {
-                            let joinHandle = thread::spawn(move || {
-                                println!("Received a request: {}", String::from_utf8_lossy(&buffer));
+                            let handler_clone = Arc::clone(&handler_arc);
 
-                                match Request::try_from(&buffer[..]) {
-                                    Ok(request) => handler.handle_request(&request),
-                                    Err(e) => handler.handle_bad_request(&e),            
+                            let joinHandle = thread::spawn(move || {
+                                    println!("Received a request: {}", String::from_utf8_lossy(&buffer));
+                                    let handler = handler_clone.lock().unwrap();
+    
+                                    match Request::try_from(&buffer[..]) {
+                                        Ok(request) => handler.handle_request(&request),
+                                        Err(e) => handler.handle_bad_request(&e),            
+                                    }
                                 }
-                            });
-                            let response = joinHandle.join().map(|resp| resp);
-                            if let Err(e) = response.send(&mut stream) {
-                                println!("Failed to parse a request: {}", e);
-                            }
+                            );  
+
+                            match joinHandle.join() {
+                                Ok(response) => {
+                                    response.send(&mut stream);
+                                },
+                                Err(e) => {
+                                    println!("Failed to parse a request: {}", Self::format_any(&e));
+                                }
+                            };
                         },
                         Err(e) => println!("Failed to read from connection: {}", e)
                     }
@@ -63,5 +78,9 @@ impl Server {
                 Err(e) => println!("Connection failed: {}", e)
             }
         }
+    }
+
+    fn format_any(value: &Box<dyn Any + Send>) -> String {
+        format!("{:?}", value)
     }
 }
