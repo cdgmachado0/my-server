@@ -1,22 +1,22 @@
 use super::method::{Method, MethodError};
+use super::{headers::HeadersReq, QueryString};
 use std::convert::TryFrom;
 use std::error::Error;
-use std::fmt::{Display, Formatter, Result as FmtResult, Debug};
+use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 use std::str;
 use std::str::Utf8Error;
-use super::{QueryString, headers::HeadersReq};
 
 #[derive(Debug)]
 pub struct Request<'buf> {
     path: &'buf str,
     query_string: Option<QueryString<'buf>>,
     method: Method,
-    headers: HeadersReq<'buf>
-} 
+    headers: HeadersReq<'buf>,
+}
 
 impl<'buf> Request<'buf> {
     pub fn path(&self) -> &str {
-        &self.path
+        self.path
     }
 
     pub fn method(&self) -> &Method {
@@ -38,14 +38,14 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     fn try_from(buf: &'buf [u8]) -> Result<Self, Self::Error> {
         let request = str::from_utf8(buf)?;
 
-        let headers = get_headers(&request);
+        let headers = get_headers(request);
 
         let (method, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
         let (mut path, request) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
         let (protocol, _) = get_next_word(request).ok_or(ParseError::InvalidRequest)?;
 
         if protocol != "HTTP/1.1" {
-            return Err(ParseError::InvalidProtocol)
+            return Err(ParseError::InvalidProtocol);
         }
 
         let method: Method = method.parse()?;
@@ -61,44 +61,37 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
             path,
             query_string,
             method,
-            headers
+            headers,
         })
     }
 }
 
-
-fn get_next_word(request: &str) -> Option<(&str, &str)> { 
+fn get_next_word(request: &str) -> Option<(&str, &str)> {
     for (i, c) in request.chars().enumerate() {
         if c == ' ' || c == '\r' {
-            return Some((&request[..i], &request[i + 1..]))
+            return Some((&request[..i], &request[i + 1..]));
         }
     }
     None
 }
 
-
-fn get_headers(request: &str) -> HeadersReq<'_> { 
-    let keys = [
-        "Host",
-        "User-Agent",
-        "Accept-Encoding",
-        "Accept-Language"
-    ];
+fn get_headers(request: &str) -> HeadersReq<'_> {
+    let keys = ["Host", "User-Agent", "Accept-Encoding", "Accept-Language"];
 
     let mut headers = HeadersReq::new();
 
-    for key in keys.iter() { 
+    for key in keys.iter() {
         let index = request.rfind(key).unwrap();
         let last_i = index + key.len() + 2;
 
-        'inner: for (i, c) in request.chars().enumerate().skip(last_i) { 
-            if c == '\r' && request.chars().nth(i + 1).unwrap() == '\n'{
+        'inner: for (i, c) in request.chars().enumerate().skip(last_i) {
+            if c == '\r' && request.chars().nth(i + 1).unwrap() == '\n' {
                 headers.insert(key, &request[last_i..i - 1]);
                 break 'inner;
             }
         }
     }
-    return headers;
+    headers
 }
 
 pub enum ParseError {
@@ -114,7 +107,7 @@ impl ParseError {
             Self::InvalidRequest => "Invalid Request",
             Self::InvalidEncoding => "Invalid Encoding",
             Self::InvalidProtocol => "Invalid Protocol",
-            Self::InvalidMethod => "Invalid Method"
+            Self::InvalidMethod => "Invalid Method",
         }
     }
 }

@@ -1,20 +1,13 @@
-use crate::http::{
-    Request, 
-    Response, 
-    StatusCode, 
-    ParseError, 
-    headers::ContentType
-};
+use crate::http::{headers::ContentType, ParseError, Request, Response, StatusCode};
 
 use std::{
-    thread,
-    io::Read,
     any::Any,
     convert::TryFrom,
+    io::Read,
     net::TcpListener,
-    sync::{Arc, Mutex}
+    sync::{Arc, Mutex},
+    thread,
 };
-
 
 pub trait Handler: Send + Sync {
     fn handle_request(&mut self, request: &Request) -> Response;
@@ -28,7 +21,7 @@ pub trait Handler: Send + Sync {
 }
 
 pub struct Server {
-    addr: String
+    addr: String,
 }
 
 impl Server {
@@ -44,39 +37,41 @@ impl Server {
 
         loop {
             match listener.accept() {
-                Ok((mut stream, _)) => {     
-                    let mut buffer = [0; 1024];  
+                Ok((mut stream, _)) => {
+                    let mut buffer = [0; 1024];
 
                     match stream.read(&mut buffer) {
                         Ok(_) => {
                             let handler_clone = Arc::clone(&handler_arc);
 
                             let join_handle = thread::spawn(move || {
-                                    println!("Received a request: {}", String::from_utf8_lossy(&buffer));
-                                    let mut handler = handler_clone.lock().unwrap();
-    
-                                    match Request::try_from(&buffer[..]) {
-                                        Ok(request) => handler.handle_request(&request),
-                                        Err(e) => handler.handle_bad_request(&e),            
-                                    }
+                                println!(
+                                    "Received a request: {}",
+                                    String::from_utf8_lossy(&buffer)
+                                );
+                                let mut handler = handler_clone.lock().unwrap();
+
+                                match Request::try_from(&buffer[..]) {
+                                    Ok(request) => handler.handle_request(&request),
+                                    Err(e) => handler.handle_bad_request(&e),
                                 }
-                            );  
+                            });
 
                             match join_handle.join() {
-                                Ok(response) => {   
+                                Ok(response) => {
                                     if let Err(e) = response.send(&mut stream) {
                                         println!("Failed to parse a request: {}", e);
                                     }
-                                },
+                                }
                                 Err(e) => {
                                     println!("Failed to parse a request: {}", Self::format_any(&e));
                                 }
                             };
-                        },
-                        Err(e) => println!("Failed to read from connection: {}", e)
+                        }
+                        Err(e) => println!("Failed to read from connection: {}", e),
                     }
-                },
-                Err(e) => println!("Connection failed: {}", e)
+                }
+                Err(e) => println!("Connection failed: {}", e),
             }
         }
     }

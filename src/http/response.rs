@@ -1,38 +1,36 @@
-use std::io::{Write, Result as IoResult};
+use super::headers::{ContentType, HeadersResp};
 use super::StatusCode;
-use super::headers::{HeadersResp, ContentType};
-
+use std::io::{Result as IoResult, Write};
 
 #[derive(Debug)]
 pub struct Response {
     status_code: StatusCode,
     body: Option<String>,
-    headers: HeadersResp
+    headers: HeadersResp,
 }
-
 
 impl Response {
     pub fn new(
-        status_code: StatusCode, 
+        status_code: StatusCode,
         body: Option<String>,
         content_length: Option<u64>,
-        file_type: ContentType
+        file_type: ContentType,
     ) -> Self {
-        Response { 
-            status_code, 
-            body, 
-            headers: HeadersResp::new(content_length, file_type)
+        Response {
+            status_code,
+            body,
+            headers: HeadersResp::new(content_length, file_type),
         }
     }
 
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
         let body = match &self.body {
             Some(b) => b,
-            None => ""
+            None => "",
         };
 
         write!(
-            stream, 
+            stream,
             "HTTP/1.1 {} {}\r\nServer: {}\r\nContent-Type: {}\r\nContent-Length: {}\r\nDate: {} \r\n\r\n{}", 
             self.status_code,
             self.status_code.reason_phrase(),
@@ -44,4 +42,3 @@ impl Response {
         )
     }
 }
- 

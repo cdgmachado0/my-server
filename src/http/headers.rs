@@ -1,28 +1,29 @@
 use chrono::prelude::{DateTime, Utc};
-use std::env::consts::{OS, ARCH};
 use std::collections::HashMap;
+use std::env::consts::{ARCH, OS};
 
 #[derive(Debug)]
 pub struct HeadersResp {
     server: String,
-    content_type: String, 
+    content_type: String,
     content_length: u64,
-    date: DateTime<Utc>
+    date: DateTime<Utc>,
 }
 
 #[derive(Debug)]
 pub struct HeadersReq<'hr> {
-    data: Option<HashMap<&'hr str, &'hr str>>
+    data: Option<HashMap<&'hr str, &'hr str>>,
 }
-
 
 impl<'hr> HeadersReq<'hr> {
     pub fn new() -> Self {
-       Self { data: None }
+        Self { data: None }
     }
 
     pub fn insert(&mut self, key: &'hr str, value: &'hr str) {
-        self.data.get_or_insert_with(HashMap::new).insert(key, value);
+        self.data
+            .get_or_insert_with(HashMap::new)
+            .insert(key, value);
     }
 
     pub fn data(&self) -> Option<&HashMap<&str, &str>> {
@@ -68,5 +69,5 @@ impl HeadersResp {
 pub enum ContentType {
     HTML,
     CSS,
-    NoType
+    NoType,
 }
